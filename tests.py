@@ -111,3 +111,30 @@ def test_choice_empty_text_raises_exception():
     question = Question(title='Q1')
     with pytest.raises(Exception, match='Text cannot be empty'):
         question.add_choice('')
+
+
+# Fixture: Cria e retorna uma questão com 3 alternativas já configuradas
+@pytest.fixture
+def quiz_question():
+    question = Question(title='Que país foi campeão da Copa do Mundo de Futebol 2026?', max_selections=1)
+    question.add_choice('Argentina', False)     # Recebe ID 1
+    question.add_choice('Espanha', True)     # Recebe ID 2
+    question.add_choice('Brasil', False)   # Recebe ID 3
+    return question
+
+# Teste 1 usando a fixture: Verificar se a correção funciona corretamente
+def test_fixture_correct_selected_choices(quiz_question):
+    # Passamos a opção correta (Espanha, ID 2)
+    correct_ids = quiz_question.correct_selected_choices([2])
+    assert correct_ids == [2]
+
+# Teste 2 usando a fixture: Verificar a remoção de uma alternativa e o estado das restantes
+def test_fixture_remove_choice(quiz_question):
+    # Removemos a opção 'Argentina' (ID 1)
+    quiz_question.remove_choice_by_id(1)
+    
+    assert len(quiz_question.choices) == 2
+    
+    # Garantimos que tentar remover o mesmo ID novamente gera erro
+    with pytest.raises(Exception, match='Invalid choice id'):
+        quiz_question.remove_choice_by_id(1)
